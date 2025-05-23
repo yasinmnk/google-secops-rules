@@ -1,0 +1,358 @@
+rule intune_policy_change_spike {
+
+    meta:
+      author = "Yasin Manka"
+      description = "Detects a spike in Intune policy modifications by a single user in a short time."
+      rule_id = "mr_intune_policy_change_spike"
+      rule_name = "Microsoft Intune - Policy Change Spike"
+      mitre_attack_tactic = "Privilege Escalation"
+      mitre_attack_technique = "Access Token Manipulation"
+      mitre_attack_url = "https://attack.mitre.org/techniques/T1134/"
+      mitre_attack_version = "v14.1"
+      type = "Alert"
+      data_source = "Microsoft Intune Audit Logs"
+      platform = "Microsoft Intune"
+      severity = "High"
+      priority = "High"
+  
+    events:
+      $e.metadata.log_type = "INTUNE_AUDIT"
+      $e.metadata.product_event_type = "PolicyModification"
+      $e.principal.user.userid = $user_id
+  
+    match:
+      $user_id over 1h
+  
+    outcome:
+      $event_count = count_distinct($e.metadata.id)
+      $user_ids = array_distinct($e.principal.user.userid)
+      $source_ips = array_distinct($e.principal.ip)
+      $risk_score = max(80)
+  
+    condition:
+      $e
+  }
+  
+  
+  rule intune_device_retire_bulk {
+  
+    meta:
+      author = "Yasin Manka"
+      description = "Detects multiple devices retired via Intune by the same user within 1 hour."
+      rule_id = "mr_intune_device_retire_bulk"
+      rule_name = "Microsoft Intune - Multiple Device Retire Commands"
+      mitre_attack_tactic = "Impact"
+      mitre_attack_technique = "Data Destruction"
+      mitre_attack_url = "https://attack.mitre.org/techniques/T1485/"
+      mitre_attack_version = "v14.1"
+      type = "Alert"
+      data_source = "Microsoft Intune Audit Logs"
+      platform = "Microsoft Intune"
+      severity = "Medium"
+      priority = "Medium"
+  
+    events:
+      $e.metadata.log_type = "INTUNE_AUDIT"
+      $e.metadata.product_event_type = "DeviceRetire"
+      $e.principal.user.userid = $user_id
+  
+    match:
+      $user_id over 1h
+  
+    outcome:
+      $event_count = count_distinct($e.metadata.id)
+      $user_ids = array_distinct($e.principal.user.userid)
+      $source_ips = array_distinct($e.principal.ip)
+      $risk_score = max(60)
+  
+    condition:
+      $e
+  }
+  
+  
+  rule intune_admin_role_assignment {
+  
+    meta:
+      author = "Yasin Manka"
+      description = "Detects when a high-privilege admin role is assigned through Intune."
+      rule_id = "mr_intune_admin_role_assignment"
+      rule_name = "Microsoft Intune - New Admin Role Assigned"
+      mitre_attack_tactic = "Privilege Escalation"
+      mitre_attack_technique = "Create Account"
+      mitre_attack_url = "https://attack.mitre.org/techniques/T1136/"
+      mitre_attack_version = "v14.1"
+      type = "Alert"
+      data_source = "Microsoft Intune Audit Logs"
+      platform = "Microsoft Intune"
+      severity = "High"
+      priority = "High"
+  
+    events:
+      $e.metadata.log_type = "INTUNE_AUDIT"
+      $e.metadata.product_event_type = "RoleAssignment"
+      $e.principal.user.userid = $user_id
+  
+    match:
+      $user_id over 1h
+  
+    outcome:
+      $event_count = count_distinct($e.metadata.id)
+      $user_ids = array_distinct($e.principal.user.userid)
+      $source_ips = array_distinct($e.principal.ip)
+      $risk_score = max(80)
+  
+    condition:
+      $e
+  }
+  
+  
+  rule intune_compliance_policy_removed {
+  
+    meta:
+      author = "Yasin Manka"
+      description = "Detects removal of compliance policies that ensure device health."
+      rule_id = "mr_intune_compliance_policy_removed"
+      rule_name = "Microsoft Intune - Compliance Policy Removed"
+      mitre_attack_tactic = "Defense Evasion"
+      mitre_attack_technique = "Impair Defenses"
+      mitre_attack_url = "https://attack.mitre.org/techniques/T1562/"
+      mitre_attack_version = "v14.1"
+      type = "Alert"
+      data_source = "Microsoft Intune Audit Logs"
+      platform = "Microsoft Intune"
+      severity = "Medium"
+      priority = "Medium"
+  
+    events:
+      $e.metadata.log_type = "INTUNE_AUDIT"
+      $e.metadata.product_event_type = "CompliancePolicyDelete"
+      $e.principal.user.userid = $user_id
+  
+    match:
+      $user_id over 1h
+  
+    outcome:
+      $event_count = count_distinct($e.metadata.id)
+      $user_ids = array_distinct($e.principal.user.userid)
+      $source_ips = array_distinct($e.principal.ip)
+      $risk_score = max(60)
+  
+    condition:
+      $e
+  }
+  
+  
+  rule intune_suspicious_enrollment_locations {
+  
+    meta:
+      author = "Yasin Manka"
+      description = "Detects new Intune device enrollments from risky or unusual countries."
+      rule_id = "mr_intune_suspicious_enrollment_locations"
+      rule_name = "Microsoft Intune - Device Enrolled from Unusual Countries"
+      mitre_attack_tactic = "Initial Access"
+      mitre_attack_technique = "Valid Accounts"
+      mitre_attack_url = "https://attack.mitre.org/techniques/T1078/"
+      mitre_attack_version = "v14.1"
+      type = "Alert"
+      data_source = "Microsoft Intune Audit Logs"
+      platform = "Microsoft Intune"
+      severity = "High"
+      priority = "High"
+  
+    events:
+      $e.metadata.log_type = "INTUNE_AUDIT"
+      $e.metadata.product_event_type = "DeviceEnrollment"
+      $e.principal.user.userid = $user_id
+  
+    match:
+      $user_id over 1h
+  
+    outcome:
+      $event_count = count_distinct($e.metadata.id)
+      $user_ids = array_distinct($e.principal.user.userid)
+      $source_ips = array_distinct($e.principal.ip)
+      $risk_score = max(80)
+  
+    condition:
+      $e
+  }
+
+  #Intune Rules
+  rule intune_device_wipe_spike {
+
+    meta:
+      author = "Yasin Manka"
+      description = "Detects when a user initiates multiple device wipes via Microsoft Intune within one hour."
+      rule_id = "mr_intune_device_wipe_spike"
+      rule_name = "Microsoft Intune - Multiple Device Wipes"
+      mitre_attack_tactic = "Impact"
+      mitre_attack_technique = "Data Destruction"
+      mitre_attack_url = "https://attack.mitre.org/techniques/T1485/"
+      mitre_attack_version = "v14.1"
+      type = "Alert"
+      data_source = "Microsoft Intune Audit Logs"
+      platform = "Microsoft Intune"
+      severity = "High"
+      priority = "High"
+  
+    events:
+      $e.metadata.log_type = "INTUNE_AUDIT"
+      $e.metadata.product_event_type = "DeviceWipe"
+      $e.principal.user.userid = $user_id
+  
+    match:
+      $user_id over 1h
+  
+    outcome:
+      $event_count = count_distinct($e.metadata.id)
+      $user_ids = array_distinct($e.principal.user.userid)
+      $source_ips = array_distinct($e.principal.ip)
+      $risk_score = max(80)
+  
+    condition:
+      $e
+  }
+  
+  
+  rule intune_app_uninstall_spike {
+  
+    meta:
+      author = "Yasin Manka"
+      description = "Detects when a user uninstalls multiple apps via Microsoft Intune within one hour."
+      rule_id = "mr_intune_app_uninstall_spike"
+      rule_name = "Microsoft Intune - Multiple App Uninstalls"
+      mitre_attack_tactic = "Persistence"
+      mitre_attack_technique = "Indicator Removal on Host"
+      mitre_attack_url = "https://attack.mitre.org/techniques/T1070/"
+      mitre_attack_version = "v14.1"
+      type = "Alert"
+      data_source = "Microsoft Intune Audit Logs"
+      platform = "Microsoft Intune"
+      severity = "Medium"
+      priority = "Medium"
+  
+    events:
+      $e.metadata.log_type = "INTUNE_AUDIT"
+      $e.metadata.product_event_type = "AppUninstall"
+      $e.principal.user.userid = $user_id
+  
+    match:
+      $user_id over 1h
+  
+    outcome:
+      $event_count = count_distinct($e.metadata.id)
+      $user_ids = array_distinct($e.principal.user.userid)
+      $source_ips = array_distinct($e.principal.ip)
+      $risk_score = max(60)
+  
+    condition:
+      $e
+  }
+  
+  
+  rule intune_profile_delete_spike {
+  
+    meta:
+      author = "Yasin Manka"
+      description = "Detects when a user deletes multiple configuration profiles via Intune."
+      rule_id = "mr_intune_profile_delete_spike"
+      rule_name = "Microsoft Intune - Configuration Profile Deletions"
+      mitre_attack_tactic = "Defense Evasion"
+      mitre_attack_technique = "Modify Cloud Compute Infrastructure"
+      mitre_attack_url = "https://attack.mitre.org/techniques/T1578/"
+      mitre_attack_version = "v14.1"
+      type = "Alert"
+      data_source = "Microsoft Intune Audit Logs"
+      platform = "Microsoft Intune"
+      severity = "High"
+      priority = "High"
+  
+    events:
+      $e.metadata.log_type = "INTUNE_AUDIT"
+      $e.metadata.product_event_type = "ConfigurationProfileDelete"
+      $e.principal.user.userid = $user_id
+  
+    match:
+      $user_id over 1h
+  
+    outcome:
+      $event_count = count_distinct($e.metadata.id)
+      $user_ids = array_distinct($e.principal.user.userid)
+      $source_ips = array_distinct($e.principal.ip)
+      $risk_score = max(80)
+  
+    condition:
+      $e
+  }
+  
+  
+  rule intune_device_enrollment_spike {
+  
+    meta:
+      author = "Yasin Manka"
+      description = "Detects mass device enrollments within a short timeframe which may indicate abuse or automation."
+      rule_id = "mr_intune_device_enrollment_spike"
+      rule_name = "Microsoft Intune - Mass Device Enrollments"
+      mitre_attack_tactic = "Initial Access"
+      mitre_attack_technique = "Supply Chain Compromise"
+      mitre_attack_url = "https://attack.mitre.org/techniques/T1195/"
+      mitre_attack_version = "v14.1"
+      type = "Alert"
+      data_source = "Microsoft Intune Audit Logs"
+      platform = "Microsoft Intune"
+      severity = "Medium"
+      priority = "Medium"
+  
+    events:
+      $e.metadata.log_type = "INTUNE_AUDIT"
+      $e.metadata.product_event_type = "DeviceEnrollment"
+      $e.principal.user.userid = $user_id
+  
+    match:
+      $user_id over 1h
+  
+    outcome:
+      $event_count = count_distinct($e.metadata.id)
+      $user_ids = array_distinct($e.principal.user.userid)
+      $source_ips = array_distinct($e.principal.ip)
+      $risk_score = max(60)
+  
+    condition:
+      $e
+  }
+  
+  
+  rule intune_remote_wipe_triggered {
+  
+    meta:
+      author = "Yasin Manka"
+      description = "Detects device wipes initiated from unusual geographic IP addresses."
+      rule_id = "mr_intune_remote_wipe_triggered"
+      rule_name = "Microsoft Intune - Remote Wipe from Unusual Location"
+      mitre_attack_tactic = "Impact"
+      mitre_attack_technique = "Data Destruction"
+      mitre_attack_url = "https://attack.mitre.org/techniques/T1485/"
+      mitre_attack_version = "v14.1"
+      type = "Alert"
+      data_source = "Microsoft Intune Audit Logs"
+      platform = "Microsoft Intune"
+      severity = "High"
+      priority = "High"
+  
+    events:
+      $e.metadata.log_type = "INTUNE_AUDIT"
+      $e.metadata.product_event_type = "DeviceWipe"
+      $e.principal.user.userid = $user_id
+  
+    match:
+      $user_id over 1h
+  
+    outcome:
+      $event_count = count_distinct($e.metadata.id)
+      $user_ids = array_distinct($e.principal.user.userid)
+      $source_ips = array_distinct($e.principal.ip)
+      $risk_score = max(80)
+  
+    condition:
+      $e
+  }
