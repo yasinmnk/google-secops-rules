@@ -47,3 +47,5 @@ rule automated_exfiltration {
       $e1
   }
   
+
+  
