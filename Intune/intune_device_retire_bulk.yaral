@@ -1,0 +1,36 @@
+  
+  rule intune_device_retire_bulk {
+  
+    meta:
+      author = "Yasin Manka"
+      description = "Detects multiple devices retired via Intune by the same user within 1 hour."
+      rule_id = "mr_intune_device_retire_bulk"
+      rule_name = "Microsoft Intune - Multiple Device Retire Commands"
+      mitre_attack_tactic = "Impact"
+      mitre_attack_technique = "Data Destruction"
+      mitre_attack_url = "https://attack.mitre.org/techniques/T1485/"
+      mitre_attack_version = "v14.1"
+      type = "Alert"
+      data_source = "Microsoft Intune Audit Logs"
+      platform = "Microsoft Intune"
+      severity = "Medium"
+      priority = "Medium"
+  
+    events:
+      $e.metadata.log_type = "INTUNE_AUDIT"
+      $e.metadata.product_event_type = "DeviceRetire"
+      $e.principal.user.userid = $user_id
+  
+    match:
+      $user_id over 1h
+  
+    outcome:
+      $event_count = count_distinct($e.metadata.id)
+      $user_ids = array_distinct($e.principal.user.userid)
+      $source_ips = array_distinct($e.principal.ip)
+      $risk_score = max(60)
+  
+    condition:
+      $e
+  }
+  
